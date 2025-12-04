@@ -1,0 +1,23 @@
+.header {
+  background-color: #ffffff;
+  padding: 24px 32px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.header-content {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 32px;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.logo-text {
+  font-size: 24px;
+  font-weight: 600;
+  margin-left: 8px;
+  color: #1f2937;
+}

@@ -1,0 +1,281 @@
+.camera-table {
+  background-color: #ffffff;
+}
+
+.table-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 24px 32px;
+  margin-bottom: 24px;
+}
+
+.header-title {
+  flex: 1;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  color: #4b5563;
+  font-size: 14px;
+}
+
+.search-box {
+  position: relative;
+  width: 256px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 16px 8px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: #ffffff;
+}
+
+.search-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #3b82f6;
+}
+
+.search-input::placeholder {
+  color: #9ca3af;
+}
+
+.search-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.filters {
+  display: flex;
+  gap: 12px;
+  padding: 0 32px;
+  margin-bottom: 24px;
+}
+
+.filter-select-wrapper {
+  position: relative;
+}
+
+.filter-select {
+  padding: 8px 16px 8px 40px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: #ffffff;
+  cursor: pointer;
+  appearance: none;
+}
+
+.filter-select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #3b82f6;
+}
+
+.filter-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.filter-dropdown-icon {
+  position: absolute;
+  right: 12px;
+  top: 6px;
+  width: 12px;
+  height: 12px;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-header-row {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.table-header-cell {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4b5563;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.table-row {
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.15s;
+}
+
+.table-row:hover {
+  background-color: #f9fafb;
+}
+
+.table-cell {
+  padding: 16px;
+  font-size: 14px;
+  color: #374151;
+}
+
+.table-checkbox {
+  width: 16px;
+  height: 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.camera-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dot.online {
+  background-color: #10b981;
+}
+
+.status-dot.offline {
+  background-color: #ef4444;
+}
+
+.camera-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.camera-name {
+  font-weight: 500;
+  color: #111827;
+}
+
+.info-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background-color: #fed7aa;
+  color: #ea580c;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.camera-details {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.health-icons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.health-badges {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.avatar-badge {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.avatar-badge.purple {
+  background-color: #7c3aed;
+}
+
+.avatar-badge.blue {
+  background-color: #2563eb;
+}
+
+.health-icon-wrapper {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.health-icon-wrapper.alert {
+  background-color: #ffecf0;
+  color: #f97316;
+}
+
+.health-icon-wrapper.warning {
+  background-color: #ffecf0;
+  color: #f97316;
+}
+
+.health-icon-wrapper.calendar {
+  background-color: #d1fae5;
+  color: #0d9488;
+}
+
+.health-icon-wrapper.check {
+  background-color: #d1fae5;
+  color: #0d9488;
+}
+
+.health-icon-wrapper.wifi {
+  background-color: #f3f4f6;
+  color: #4b5563;
+}
+
+.action-button {
+  padding: 4px;
+  background-color: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #4b5563;
+  transition: background-color 0.2s;
+}
+
+.action-button:hover {
+  background-color: #f3f4f6;
+}

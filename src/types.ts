@@ -1,15 +1,23 @@
-export interface Camera {
-  id: number;
+export interface CameraItem {
+  current_status: string;
+  hasWarning: boolean;
+  health: {
+    cloud: string;
+    device: string;
+    id: string;
+    _id: string;
+  };
+  id: string;
+  _id: string;
   name: string;
-  details: string;
-  isOnline: boolean;
   location: string;
   recorder: string;
   tasks: string;
-  status: 'Active' | 'Inactive';
-  hasAlert?: boolean;
-  hasWarning?: boolean;
-  hasCheck?: boolean;
-  hasWifi?: boolean;
-  hasCalendar?: boolean;
+  status: string;
+}
+
+export interface CameraApiResponse {
+  status: number;
+  message: string;
+  data: CameraItem[];
 }

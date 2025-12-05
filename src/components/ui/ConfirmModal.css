@@ -1,0 +1,26 @@
+.confirm-section {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.confirm-panel {
+  background: #fff;
+  padding: 18px;
+  border-radius: 8px;
+  width: 360px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+.cm-title { margin: 0 0 8px; font-size: 16px; }
+.cm-message { margin: 0 0 16px; color: #444; }
+.confirm-btnbox { display:flex; gap:12px; justify-content:flex-end; }
+.cm-cancel {
+  background: transparent; border: 1px solid #e5e7eb; padding: 8px 12px; border-radius:6px; cursor:pointer;
+}
+.cm-confirm {
+  background: #0ea5a4; color: white; border: none; padding: 8px 12px; border-radius:6px; cursor:pointer;
+}
+.cm-confirm:disabled, .cm-cancel:disabled { opacity:0.6; cursor:not-allowed; }

@@ -1,213 +1,189 @@
-import { useEffect, useState } from "react";
-import {
-  Search,
-  MapPin,
-  Activity,
-  Calendar,
-  CheckCircle,
-  AlertCircle,
-  Wifi,
-  MoreVertical,
-  Info,
-} from "lucide-react";
-
-import type { Camera } from "../types";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useEffect, useMemo, useState } from "react";
+import type { CameraItem } from "../types";
+import { Pagination } from "./Pagination";
+import { CameraTableHeader } from "./CameraTableHeader";
+import { CameraTableBody } from "./CameraTableBody";
+import { fetchCameras, updateCameraStatus } from "../api/camers";
 import "./CameraTable.css";
+import location from "../assets/location-icon.svg";
+import service from "../assets/rss-feed.svg";
 
 interface CameraTableProps {
-  cameras: Camera[];
+  apiUrl?: string;
+  apiToken?: string;
 }
 
-export function CameraTable({ cameras }: CameraTableProps) {
+export const CameraTable: React.FC<CameraTableProps> = ({
+  apiUrl,
+  apiToken,
+}) => {
+  const [cameras, setCameras] = useState<CameraItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCameras, setSelectedCameras] = useState<number[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedCameras, setSelectedCameras] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const ac = new AbortController();
+    setLoading(true);
+    setError(null);
+
+    fetchCameras({ apiUrl, apiToken, signal: ac.signal })
+      .then((items: CameraItem[]) => {
+        console.log(items, "@@@");
+        setCameras(items);
+      })
+      .catch((err: any) => {
+        console.log(err);
+      })
+      .finally(() => setLoading(false));
+
+    return () => ac.abort();
+  }, [apiUrl, apiToken]);
+
+  const filteredData = useMemo(() => {
+    const query = searchQuery.toLowerCase().trim();
+    const location = selectedLocation.toLowerCase();
+    const statusFilter = selectedStatus.toLowerCase();
+
+    return cameras.filter((items) => {
+      const text =
+        `${items.name} ${items.recorder} ${items.location} ${items.tasks}`.toLowerCase();
+      const status = (items.status ?? items.current_status ?? "").toLowerCase();
+
+      return (
+        (!query || text.includes(query)) &&
+        (!location || (items.location ?? "").toLowerCase() === location) &&
+        (!statusFilter || status === statusFilter)
+      );
+    });
+  }, [cameras, searchQuery, selectedLocation, selectedStatus]);
+
+  const totalItems = filteredData.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+
+    const pageItems = filteredData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
 
 
   const toggleSelectAll = () => {
-    if (selectedCameras.length === cameras.length) {
+    if (selectedCameras.length === filteredData.length) {
       setSelectedCameras([]);
     } else {
-      setSelectedCameras(cameras.map((c) => c.id));
+      setSelectedCameras(filteredData.map((c) => c.id));
     }
   };
 
-  const toggleSelectCamera = (id: number) => {
-    if (selectedCameras.includes(id)) {
-      setSelectedCameras(selectedCameras.filter((cId) => cId !== id));
-    } else {
-      setSelectedCameras([...selectedCameras, id]);
+  const toggleSelectCamera = (id: string) => {
+    setSelectedCameras((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const uniqueLocations = useMemo(() => {
+    return Array.from(new Set(cameras.map((c) => c.location).filter(Boolean)));
+  }, [cameras]);
+
+  const handleUpdateStatus = async (id: string, newStatus: string) => {
+    const previous = cameras;
+    setCameras((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? { ...item, status: newStatus, current_status: newStatus }
+          : item
+      )
+    );
+
+    try {
+      await updateCameraStatus(id, newStatus, { apiUrl: undefined, apiToken });
+    } catch (err: any) {
+      setCameras(previous);
+      alert(`Failed to update status: ${err?.message ?? err}`);
     }
   };
 
   return (
     <div className="camera-table">
-      <div className="table-header">
-        <div className="header-title">
-          <h1 className="title">Cameras</h1>
-          <p className="subtitle">Manage your cameras here.</p>
-        </div>
-        <div className="search-box">
-          <input
-            type="text"
-            placeholder="search"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="search-input"
-          />
-          <Search className="search-icon" width={16} height={16} />
-        </div>
-      </div>
+      <CameraTableHeader
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+      />
 
       <div className="filters">
         <div className="filter-select-wrapper">
-          <select className="filter-select">
-            <option>Location</option>
-            <option>New York</option>
-            <option>Los Angeles</option>
-            <option>Chicago</option>
-          </select>
-          <MapPin className="filter-icon" width={16} height={16} />
-          <svg
-            className="filter-dropdown-icon"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+          <select
+            className="filter-select"
+            value={selectedLocation}
+            onChange={(e) => {
+              setSelectedLocation(e.target.value);
+              setCurrentPage(1);
+            }}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 9l-7 7-7-7"
-            />
-          </svg>
+            <option value="">All Locations</option>
+            {uniqueLocations.map((loc) => (
+              <option key={loc} value={loc}>
+                {loc}
+              </option>
+            ))}
+          </select>
+          <img src={location} className="filter-icon" width={16} height={16} />
         </div>
 
         <div className="filter-select-wrapper">
-          <select className="filter-select">
-            <option>Status</option>
-            <option>Active</option>
-            <option>Inactive</option>
-          </select>
-          <Activity className="filter-icon" width={16} height={16} />
-          <svg
-            className="filter-dropdown-icon"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+          <select
+            className="filter-select"
+            value={selectedStatus}
+            onChange={(e) => {
+              setSelectedStatus(e.target.value);
+              setCurrentPage(1);
+            }}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 9l-7 7-7-7"
-            />
-          </svg>
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="error">Error</option>
+          </select>
+          <img src={service} className="filter-icon" width={16} height={16} />
         </div>
       </div>
 
-      <div className="table-scroll">
-        <table className="table">
-          <thead>
-            <tr className="table-header-row">
-              <th className="table-header-cell">
-                <input
-                  type="checkbox"
-                  checked={selectedCameras.length === cameras.length}
-                  onChange={toggleSelectAll}
-                  className="table-checkbox"
-                />
-              </th>
-              <th className="table-header-cell">NAME</th>
-              <th className="table-header-cell">HEALTH</th>
-              <th className="table-header-cell">LOCATION</th>
-              <th className="table-header-cell">RECORDER</th>
-              <th className="table-header-cell">TASKS</th>
-              <th className="table-header-cell">STATUS</th>
-              <th className="table-header-cell">ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cameras.map((camera) => (
-              <tr key={camera.id} className="table-row">
-                <td className="table-cell">
-                  <input
-                    type="checkbox"
-                    checked={selectedCameras.includes(camera.id)}
-                    onChange={() => toggleSelectCamera(camera.id)}
-                    className="table-checkbox"
-                  />
-                </td>
-                <td className="table-cell">
-                  <div className="camera-name-cell">
-                    <div
-                      className={`status-dot ${
-                        camera.isOnline ? "online" : "offline"
-                      }`}
-                    />
-                    <div>
-                      <div className="camera-name-row">
-                        <span className="camera-name">{camera.name}</span>
-                        {(camera.id === 1 || camera.id === 8) && (
-                          <span className="info-badge">
-                            <Info width={12} height={12} />
-                          </span>
-                        )}
-                      </div>
-                      <div className="camera-details">{camera.details}</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="table-cell">
-                  <div className="health-icons">
-                    {camera.id === 2 && (
-                      <div className="health-badges">
-                        <div className="avatar-badge purple">V</div>
-                        <div className="avatar-badge blue">A</div>
-                      </div>
-                    )}
-                    {camera.hasAlert && camera.id !== 2 && (
-                      <div className="health-icon-wrapper alert">
-                        <AlertCircle width={16} height={16} />
-                      </div>
-                    )}
-                    {camera.hasWarning && camera.id !== 2 && (
-                      <div className="health-icon-wrapper warning">
-                        <AlertCircle width={16} height={16} />
-                      </div>
-                    )}
-                    {camera.hasCalendar && (
-                      <div className="health-icon-wrapper calendar">
-                        <Calendar width={16} height={16} />
-                      </div>
-                    )}
-                    {camera.hasCheck && (
-                      <div className="health-icon-wrapper check">
-                        <CheckCircle width={16} height={16} />
-                      </div>
-                    )}
-                    {camera.hasWifi && (
-                      <div className="health-icon-wrapper wifi">
-                        <Wifi width={16} height={16} />
-                      </div>
-                    )}
-                  </div>
-                </td>
-                <td className="table-cell">{camera.location}</td>
-                <td className="table-cell">{camera.recorder}</td>
-                <td className="table-cell">{camera.tasks}</td>
-                <td className="table-cell">
-                  {/* <StatusBadge status={camera.status} /> */}
-                </td>
-                <td className="table-cell">
-                  <button className="action-button">
-                    <MoreVertical width={20} height={20} />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {loading && <div style={{ padding: 12 }}>Loading cameras...</div>}
+      {error && <div style={{ padding: 12, color: "red" }}>Error: {error}</div>}
+
+      <CameraTableBody
+        cameras={pageItems}
+        allCamerasCount={filteredData.length}
+        selectedCameras={selectedCameras}
+        onToggleSelectAll={toggleSelectAll}
+        onToggleSelectCamera={toggleSelectCamera}
+        onUpdateStatus={handleUpdateStatus}
+      />
+
+      <Pagination
+        totalItems={totalItems}
+        itemsPerPage={itemsPerPage}
+        onPageChange={(page) => {
+          setCurrentPage(page);
+        }}
+        onItemsPerPageChange={(perPage) => {
+          setItemsPerPage(perPage);
+        }}
+      />
     </div>
   );
-}
+};
